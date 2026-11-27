@@ -152,17 +152,19 @@ def level(lv, ox, oy):
     else:
         A(r_(X(4.6), Y(5.35), 2.0*K, 1.25*K, 'lf', .4)); A(f'<path d="M{X(4.6)+3:.2f} {Y(5.35)+3:.2f}h{2.0*K-6:.2f}v{1.25*K-6:.2f}h{-(2.0*K-6):.2f}z" class="d"/>')
     # escalier / trémie
+    cx, cy, rr = 1.145, 3.115, .8
     if lv == 'rdc':
-        s0 = [.3, 2.26, 1.99, 3.97]
-        for i in range(11):
-            y = s0[1]+(s0[3]-s0[1])*i/11; A(f'<path d="M{X(s0[0]):.2f} {Y(y):.2f}H{X(s0[2]):.2f}" class="l"/>')
-        A(f'<path d="M{X(1.15):.2f} {Y(2.4):.2f}V{Y(3.8):.2f}" class="l"/><path d="M{X(1.15)-1:.2f} {Y(3.8)+1.6:.2f}L{X(1.15):.2f} {Y(3.8):.2f}L{X(1.15)+1:.2f} {Y(3.8)+1.6:.2f}" class="l"/>')
-        A(f'<path d="M{X(1.99):.2f} {Y(2.26):.2f}V{Y(3.97):.2f}" class="l"/>')
+        A(f'<circle cx="{X(cx):.2f}" cy="{Y(cy):.2f}" r="{rr*K:.2f}" class="lf"/><circle cx="{X(cx):.2f}" cy="{Y(cy):.2f}" r="{.08*K:.2f}" class="lf"/>')
+        for i in range(14):
+            a = math.radians(-90 + i*360/14)
+            A(f'<path d="M{X(cx)+.08*K*math.cos(a):.2f} {Y(cy)-.08*K*math.sin(a):.2f}L{X(cx)+rr*K*math.cos(a):.2f} {Y(cy)-rr*K*math.sin(a):.2f}" class="l"/>')
+        A(f'<path d="M{X(cx)+.52*K:.2f} {Y(cy):.2f}A{.52*K:.2f} {.52*K:.2f} 0 1 0 {X(cx):.2f} {Y(cy)+.52*K:.2f}" class="t"/><path d="M{X(cx)-1.2:.2f} {Y(cy)+.52*K-1.1:.2f}L{X(cx):.2f} {Y(cy)+.52*K:.2f}L{X(cx)-1.2:.2f} {Y(cy)+.52*K+1.1:.2f}" class="t"/>')
     else:
-        s0 = [.24, 2.17, 1.99, 3.97]
-        A(f'<path d="M{X(s0[0]):.2f} {Y(s0[1]):.2f}L{X(s0[2]):.2f} {Y(s0[3]):.2f}M{X(s0[0]):.2f} {Y(s0[3]):.2f}L{X(s0[2]):.2f} {Y(s0[1]):.2f}" class="g"/>')
-        for i in range(1, 5):
-            y = s0[1]+(s0[3]-s0[1])*i/5; A(f'<path d="M{X(s0[0]):.2f} {Y(y):.2f}H{X(s0[0]+.6):.2f}" class="g"/>')
+        A(f'<circle cx="{X(cx):.2f}" cy="{Y(cy):.2f}" r="{rr*K:.2f}" class="t"/><circle cx="{X(cx):.2f}" cy="{Y(cy):.2f}" r="{.08*K:.2f}" class="lf"/>')
+        for i in range(10, 14):
+            a = math.radians(-90 + i*360/14)
+            A(f'<path d="M{X(cx)+.08*K*math.cos(a):.2f} {Y(cy)-.08*K*math.sin(a):.2f}L{X(cx)+rr*K*math.cos(a):.2f} {Y(cy)-rr*K*math.sin(a):.2f}" class="l"/>')
+        A(f'<path d="M{X(cx)-rr*K*.7:.2f} {Y(cy)-rr*K*.7:.2f}L{X(cx)+rr*K*.7:.2f} {Y(cy)+rr*K*.7:.2f}" class="g"/>')
     # sanitaires
     def tub(x0, y0, x1, y1):
         A(r_(X(x0), Y(y1), (x1-x0)*K, (y1-y0)*K, 'lf', 1.5)); A(r_(X(x0)+1.4, Y(y1)+1.4, (x1-x0)*K-2.8, (y1-y0)*K-2.8, 't', 4))
@@ -176,7 +178,7 @@ def level(lv, ox, oy):
         A(f'<path d="M{X(.3):.2f} {Y(4.95):.2f}h{1.3*K:.2f}" class="l"/>')
         for i in range(6): A(f'<circle cx="{X(.42+i*.22):.2f}" cy="{Y(4.95)+1.1:.2f}" r=".5" class="t"/>')
         A(f'<path d="M{X(.4):.2f} {Y(4.95)+2.2:.2f}q1 3 2.5 3.2" class="t"/><path d="M{X(.85):.2f} {Y(4.95)+2.2:.2f}q-.6 3.6 1.2 4.4" class="t"/>')
-        A(r_(X(.33), Y(4.85), .38*K, 1.2*K, 'lf', .3))
+        A(r_(X(.33), Y(4.85), .38*K, .58*K, 'lf', .3))
     else:
         tub(.27, 4.22, .97, 5.77); basin(1.65, 5.55, 180); wc(2.42, 5.42, 180)
     # mobilier du scénario
@@ -237,13 +239,8 @@ XR, YR = level('rdc', OXR, OY)
 XE, YE = level('etage', OXE, OY)
 
 # habitants et plantes
-A(person(XR(3.33), YR(3.4), 180))                       # dans le couloir
-A(person(XR(6.75), YR(3.55), 90, sit=True))               # Ch. rue, au bord du lit
-A(person(XR(2.3), YR(4.75), -60))                       # sas : retire ses chaussures
 A(plant(XR(7.62), YR(.55), 5)); A(plant(XR(.62), YR(5.42), 3.6, 6))
-A(person(XE(6.05), YE(1.55), 0, sit=True)); A(person(XE(5.35), YE(2.45), 90, sit=True))
-A(person(XE(3.95), YE(4.6), -90, sit=True))
-A(person(XE(2.4), YE(1.25), 0, sit=True))              # au bureau
+
 A(plant(XE(7.6), YE(3.55), 6, 8)); A(plant(XE(3.1), YE(5.5), 4.4, 7, 30)); A(plant(XE(5.0), YE(3.3), 3.6, 6))
 
 # annotations manuscrites
@@ -258,8 +255,6 @@ note(XE(6.05), YE(.4), XE(5.4), YE(-.75), 'cuisine en L, la table\nau soleil de 
 note(XE(7.6), YE(3.55), XE(6.0), YE(6.55), 'un coin vert près des fenêtres')
 
 # titres
-A(f'<text x="30" y="22" class="h" font-size="11">Maison Briatte, Saint-Cloud</text>')
-A(f'<text x="30" y="30" class="ha" font-size="5.5">deux niveaux, scénario « Alex » – plan habité, 1/50</text>')
 for ox, t in ((OXR, 'rez-de-chaussée'), (OXE, 'étage')):
     A(f'<text x="{ox+82:.2f}" y="{OY+D*K+27:.2f}" class="h" font-size="8" text-anchor="middle">{t}</text>')
 # carnet
@@ -277,6 +272,6 @@ for i in range(4):
     A(f'<rect x="{sx+i*K:.2f}" y="{sy}" width="{K}" height="1.6" fill="{"#111" if i % 2 == 0 else "#fff"}" stroke="#111" stroke-width=".15"/>')
     A(f'<text x="{sx+i*K:.2f}" y="{sy+6}" class="ha" font-size="3.4" text-anchor="middle">{i}</text>')
 A(f'<text x="{sx+4*K:.2f}" y="{sy+6}" class="ha" font-size="3.4" text-anchor="middle">4 m</text>')
-A(f'<text x="420" y="285" dx="-20" class="ha" font-size="3.6" text-anchor="end">Mobilier et personnages indicatifs – cotes à vérifier sur site</text>')
+A(f'<text x="420" y="285" dx="-20" class="ha" font-size="3.6" text-anchor="end">Mobilier indicatif – cotes à vérifier sur site</text>')
 A('</svg>')
 open(OUT, 'w').write('\n'.join(out))

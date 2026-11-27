@@ -58,7 +58,7 @@ HEAD = '''<svg xmlns="http://www.w3.org/2000/svg" width="420mm" height="297mm" v
 .agt{fill:#f6efe2;stroke:#000;stroke-width:.3}.agl{stroke:#7a6a52;stroke-width:.13}
 .el{stroke:#d96a00;stroke-width:.3;fill:#fff}.elf{fill:#d96a00}.elw{stroke:#d96a00;stroke-width:.2;fill:none;stroke-dasharray:1 .6}
 .vm{stroke:#0a8a6a;stroke-width:.3;fill:#fff}.eau{stroke:#1f6fd1;stroke-width:.3;fill:#fff}.eauf{fill:#1f6fd1}.x{stroke:#d02f1c;stroke-width:.45}
-.t2{font-size:2.5px}.t3{font-size:3px}.t4{font-size:4.2px}.b{font-weight:bold}
+.lab{paint-order:stroke;stroke:#fff;stroke-width:1.1px;stroke-linejoin:round}.t2{font-size:2.5px}.t3{font-size:3px}.t4{font-size:4.2px}.b{font-weight:bold}
 </style><rect width="420" height="297" fill="#fff"/>'''
 
 
@@ -115,14 +115,14 @@ def page(mode):
         def bubble(x, y, txt, col='#000'):
             A(f'<circle cx="{X(x):.2f}" cy="{Y(y):.2f}" r="3.3" fill="#fff" stroke="{col}" stroke-width=".28"/><text x="{X(x):.2f}" y="{Y(y)+.8:.2f}" class="t2 b" style="font-size:2.3px" text-anchor="middle">{txt}</text>')
         pre = 'R' if lv == 'rdc' else 'E'
-        s0 = st['stair']; rect(s0, fill='none', class_='fin')
-        if lv == 'rdc':
-            for i in range(1, 10):
-                y = s0[1] + (s0[3]-s0[1])*i/10; line(s0[0], y, s0[2], y, 'fin')
-        else:
-            line(s0[0], s0[1], s0[2], s0[3], 'fin'); line(s0[0], s0[3], s0[2], s0[1], 'fin')
-            A(f'<text x="{X((s0[0]+s0[2])/2):.2f}" y="{Y((s0[1]+s0[3])/2)-1.5:.2f}" class="t2" text-anchor="middle" fill="#fff" stroke="#fff" stroke-width="1.2">Trémie</text>')
-            A(f'<text x="{X((s0[0]+s0[2])/2):.2f}" y="{Y((s0[1]+s0[3])/2)-1.5:.2f}" class="t2" text-anchor="middle">Trémie</text>')
+        import math
+        cx, cy, rr = 1.145, 3.115, .8
+        A(f'<circle cx="{X(cx):.2f}" cy="{Y(cy):.2f}" r="{rr*SC:.2f}" class="{"trait" if lv == "rdc" else "cache"}"/><circle cx="{X(cx):.2f}" cy="{Y(cy):.2f}" r="{.08*SC:.2f}" class="fin"/>')
+        for i in (range(14) if lv == 'rdc' else range(10, 14)):
+            a = math.radians(-90 + i*360/14)
+            A(f'<line x1="{X(cx)+.08*SC*math.cos(a):.2f}" y1="{Y(cy)-.08*SC*math.sin(a):.2f}" x2="{X(cx)+rr*SC*math.cos(a):.2f}" y2="{Y(cy)-rr*SC*math.sin(a):.2f}" class="fin"/>')
+        if lv != 'rdc':
+            A(f'<text x="{X(cx)+2:.2f}" y="{Y(cy)+5:.2f}" class="t2" text-anchor="middle" fill="#fff" stroke="#fff" stroke-width="1.2">Trémie</text><text x="{X(cx)+2:.2f}" y="{Y(cy)+5:.2f}" class="t2" text-anchor="middle">Trémie</text>')
         na = 0; dress = []
         for o in sc.get('beds', []):
             a_ = o['l'] if o['rot'] % 2 else o['w']; c_ = o['w'] if o['rot'] % 2 else o['l']
@@ -186,8 +186,8 @@ def page(mode):
         ar = AREAS.get(lv, {})
         for l in sc['labels']:
             x, y = X(l['x']), Y(l['y'])
-            A(f'<text x="{x:.2f}" y="{y:.2f}" class="t3 b" text-anchor="middle">{esc(l["t"])}</text>')
-            if ar.get(l['id']): A(f'<text x="{x:.2f}" y="{y+3.6:.2f}" class="t2" text-anchor="middle">{fr(ar[l["id"]])} m²</text>')
+            A(f'<text x="{x:.2f}" y="{y:.2f}" class="t3 b lab" text-anchor="middle">{esc(l["t"])}</text>')
+            if ar.get(l['id']): A(f'<text x="{x:.2f}" y="{y+3.6:.2f}" class="t2 lab" text-anchor="middle">{fr(ar[l["id"]])} m²</text>')
         for (lx, ly, t, a) in ar.get('_extra', []):
             A(f'<text x="{X(lx):.2f}" y="{Y(ly):.2f}" class="t3 b" text-anchor="middle">{esc(t)}</text>')
             if a: A(f'<text x="{X(lx):.2f}" y="{Y(ly)+3.6:.2f}" class="t2" text-anchor="middle">{fr(a)} m²</text>')
