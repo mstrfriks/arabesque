@@ -162,11 +162,11 @@ def level(lv, ox, oy):
         A(f'<polyline points="{P(STR.CUT)}" class="l"/><polyline points="{P(STR.ARROW)}" class="t"/>')
         A(f'<path d="M{X(1.85)-1.4:.2f} {Y(3.55)-.8:.2f}L{X(1.85):.2f} {Y(3.55):.2f}L{X(1.85)-1.4:.2f} {Y(3.55)+.8:.2f}" class="t"/>')
     else:
-        A(f'<polygon points="{P(STR.FOOT[2:]+[(.3, 3.1)])}" fill="url(#beton)" stroke="#111" stroke-width=".3"/>')
-        for a, b in STR.treads()[2:]: A(f'<path d="M{X(a[0]):.2f} {Y(a[1]):.2f}L{X(b[0]):.2f} {Y(b[1]):.2f}" class="l"/>')
+        A(f'<polygon points="{P(STR.FOOT_UP)}" fill="url(#beton)" stroke="#111" stroke-width=".3"/>')
+        for a, b in STR.T_UP: A(f'<path d="M{X(a[0]):.2f} {Y(a[1]):.2f}L{X(b[0]):.2f} {Y(b[1]):.2f}" class="l"/>')
         A(f'<path d="M{X(.24):.2f} {Y(2.17):.2f}L{X(1.99):.2f} {Y(3.1):.2f}M{X(.24):.2f} {Y(3.1):.2f}L{X(1.99):.2f} {Y(2.17):.2f}" class="g"/>')
         A(f'<rect x="{X(2.1):.2f}" y="{Y(3.85):.2f}" width="{.55*K:.2f}" height="{.55*K:.2f}" class="d"/>')
-        A(f'<polyline points="{P(STR.ARROW[1:])}" class="t"/><path d="M{X(1.85)-1.4:.2f} {Y(3.55)-.8:.2f}L{X(1.85):.2f} {Y(3.55):.2f}L{X(1.85)-1.4:.2f} {Y(3.55)+.8:.2f}" class="t"/>')
+        A(f'<polyline points="{P(STR.ARROW_UP)}" class="t"/><path d="M{X(1.85)-1.4:.2f} {Y(3.55)-.8:.2f}L{X(1.85):.2f} {Y(3.55):.2f}L{X(1.85)-1.4:.2f} {Y(3.55)+.8:.2f}" class="t"/>')
     # sanitaires
     def tub(x0, y0, x1, y1):
         A(r_(X(x0), Y(y1), (x1-x0)*K, (y1-y0)*K, 'lf', 1.5)); A(r_(X(x0)+1.4, Y(y1)+1.4, (x1-x0)*K-2.8, (y1-y0)*K-2.8, 't', 4))

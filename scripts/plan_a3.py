@@ -123,12 +123,12 @@ def page(mode):
             for a, b in STR.treads(): line(*a, *b, 'fin')
             A(f'<polyline points="{P(STR.CUT)}" fill="none" stroke="#000" stroke-width=".25"/>')
             A(f'<polyline points="{P(STR.ARROW)}" class="fin"/><path d="M{X(1.85)-1.4:.2f} {Y(3.55)-.8:.2f}L{X(1.85):.2f} {Y(3.55):.2f}L{X(1.85)-1.4:.2f} {Y(3.55)+.8:.2f}" class="fin"/>')
-            A(f'<text x="{X(.75):.2f}" y="{Y(2.4)+3:.2f}" class="t2 b" text-anchor="middle">M</text>')
+            A(f'<text x="{X(STR.START[0]):.2f}" y="{Y(2.38):.2f}" class="t2 b lab" text-anchor="middle">M</text>')
         else:
             s0 = st['stair']; line(s0[0], s0[1], s0[2], s0[3], 'fin'); line(s0[0], s0[3], s0[2], s0[1], 'fin')
-            A(f'<polygon points="{P(STR.FOOT[2:]+[(.3, 3.1)])}" fill="#ececec" stroke="#000" stroke-width=".3"/>')
-            for a, b in STR.treads()[2:]: line(*a, *b, 'fin')
-            A(f'<polyline points="{P(STR.ARROW[1:])}" class="fin"/><path d="M{X(1.85)-1.4:.2f} {Y(3.55)-.8:.2f}L{X(1.85):.2f} {Y(3.55):.2f}L{X(1.85)-1.4:.2f} {Y(3.55)+.8:.2f}" class="fin"/>')
+            A(f'<polygon points="{P(STR.FOOT_UP)}" fill="#ececec" stroke="#000" stroke-width=".3"/>')
+            for a, b in STR.T_UP: line(*a, *b, 'fin')
+            A(f'<polyline points="{P(STR.ARROW_UP)}" class="fin"/><path d="M{X(1.85)-1.4:.2f} {Y(3.55)-.8:.2f}L{X(1.85):.2f} {Y(3.55):.2f}L{X(1.85)-1.4:.2f} {Y(3.55)+.8:.2f}" class="fin"/>')
             A(f'<text x="{X(.75):.2f}" y="{Y(2.6):.2f}" class="t2 lab" text-anchor="middle">Trémie</text>')
             A(f'<rect x="{X(2.1):.2f}" y="{Y(3.85):.2f}" width="{.55*SC:.2f}" height="{.55*SC:.2f}" class="cache"/><text x="{X(2.375):.2f}" y="{Y(3.85)-1:.2f}" class="t2 lab" text-anchor="middle">Trappe combles</text>')
         na = 0; dress = []
