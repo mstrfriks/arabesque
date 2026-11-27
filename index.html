@@ -81,7 +81,7 @@ details summary{cursor:pointer;color:var(--cobt);font-size:14px;padding:6px 0}
       <div class="row"><button id="copy">Copier tout (JSON)</button><button id="reset">Scénarios d'origine</button></div>
       <span class="hint" id="msg" role="status"></span>
       <div id="out"></div>
-      <details><summary>Importer des scénarios</summary><textarea id="imp" placeholder="Colle ici un JSON copié depuis cet outil"></textarea><button id="impb">Importer</button></details>
+      <details><summary>Importer des scénarios</summary><textarea id="imp" placeholder="Colle ici un JSON copié depuis cet outil"></textarea><div class="row"><button id="impb">Importer</button><label class="hint" style="display:flex;gap:6px;align-items:center">ou un fichier <input type="file" id="impf" accept=".json,.txt,application/json"></label></div></details>
       <details><summary>Fond de plan</summary>
         <div class="grid2"><label>Décalage x (cm)<input type="number" step="1" id="cdx"></label><label>Décalage y (cm)<input type="number" step="1" id="cdy"></label><label>Échelle x (%)<input type="number" step="0.5" id="csx"></label><label>Échelle y (%)<input type="number" step="0.5" id="csy"></label><label>Opacité<input type="range" id="op" min="0.1" max="1" step="0.05"></label><label>Autre plan<input type="file" id="bgf" accept="image/*"></label></div>
         <div class="row" style="margin-top:8px"><button id="bgr">Plan d'origine</button></div>
@@ -98,11 +98,11 @@ const ST={
  rdc:{h:2.6,start:[1.4,5.55],walls:[[0,0,8.2,.21],[7.9,.21,8.2,5.69],[0,5.69,8.2,5.9],[0,.21,.3,5.69]],por:[[2.71,.21,2.91,5.69]],
   fixed:[[.3,2.16,2.71,2.26],[.3,4.13,1.62,4.23]],
   win:[[1.14,0,2.51,.21,'S'],[3.05,0,5.09,.21,'S'],[5.45,0,7.6,.21,'S'],[5.5,5.69,7.88,5.9,'N'],[2.92,5.69,5.25,5.9,'N']],
-  gaps:[[.95,5.69,1.9,5.9],[2.71,1.16,2.91,1.86],[2.71,4.25,2.91,5.05]],hatch:[.3,2.26,1.99,3.97],beam:null},
+  gaps:[[.95,5.69,1.9,5.9],[2.71,1.16,2.91,1.86],[2.71,4.25,2.91,5.05]],sw:[[0,0,0],[1,0,0],[2,1,0]],hatch:[.3,2.26,1.99,3.97],beam:null},
  etage:{h:2.5,start:[2.3,3.7],walls:[[0,0,8.2,.1],[7.96,.1,8.2,5.8],[0,5.8,8.2,5.9],[0,.1,.24,5.8]],por:[[2.71,2.86,2.91,5.8]],
   fixed:[[.24,2.1,2.06,2.17],[1.99,2.17,2.06,3.46]],
   win:[[1.15,0,2.77,.1,'S'],[3.01,0,4.64,.1,'S'],[5.31,0,7.36,.1,'S'],[5.32,5.8,7.6,5.9,'N'],[3.22,5.8,5.15,5.9,'N'],[0,2.86,.24,3.57,'W'],[0,1.16,.24,2.11,'W']],
-  gaps:[[2.71,3.07,2.91,3.86]],hatch:[.24,2.17,1.99,3.97],beam:[2.71,.1,2.91,2.86]}};
+  gaps:[[2.71,3.07,2.91,3.86]],sw:[],hatch:[.24,2.17,1.99,3.97],beam:[2.71,.1,2.91,2.86]}};
 const PR={bed180:{k:'bed',w:1.8,l:2,n:'Lit 180 × 200'},bed160:{k:'bed',w:1.6,l:2,n:'Lit 160 × 200'},bed140:{k:'bed',w:1.4,l:1.9,n:'Lit 140 × 190'},bed90:{k:'bed',w:.9,l:2,n:'Lit 90 × 200'},bebe:{k:'bed',w:.6,l:1.2,n:'Lit bébé 60 × 120',side:.5},
   dr:{k:'dr',w:1.2,l:.6,n:'Dressing',front:.6},bureau:{k:'box',w:1.2,l:.6,n:'Bureau',front:.7},commode:{k:'box',w:.8,l:.45,n:'Commode',front:.6},
   cuisine:{k:'box',w:2.4,l:.6,n:'Cuisine linéaire',front:.9},canape:{k:'box',w:2.1,l:.9,n:'Canapé'},table:{k:'box',w:1.6,l:.9,n:'Table'}};
@@ -155,12 +155,14 @@ function objIssues(o,s,B,R){const out=[],r=objR(o),sh=[r[0]+.01,r[1]+.01,r[2]-.0
   if(blockedIn(sh,R.B))out.push(['bad','Touche un mur']);
   if(s.beds.some(x=>x.id!=o.id&&inter(r,objR(x))))out.push(['bad','Chevauche un meuble']);
   for(const d of s.doors){if((d.ty||'b')!='b')continue;const w=s.walls.find(x=>x.id==d.wall);if(w&&!w.seg&&inter(r,doorSq(d,w),.01)){out.push(['bad','Gêne l\'ouverture d\'une porte']);break}}
+  if(fixedDoors(lvl).some(f=>inter(r,doorSq(f.d,f.w),.01)))out.push(['bad','Gêne une porte existante']);
   const ru=rules(o),cl=[];
   if(ru.both){for(const[d,nm] of [[lf,'d\'un côté'],[rt,'de l\'autre côté']]){const t=freeDepth(o,d,ru.both,s,R.B);cl.push([d,ru.both,t]);if(t<ru.both-1e-6)out.push(['warn',`Passage ${Math.round(t*100)} cm ${nm}`])}}
   if(ru.one){const a=freeDepth(o,lf,ru.one,s,R.B),c=freeDepth(o,rt,ru.one,s,R.B);cl.push([a>=c?lf:rt,ru.one,Math.max(a,c)]);if(Math.max(a,c)<ru.one-1e-6)out.push(['warn',`Aucun côté libre sur ${Math.round(ru.one*100)} cm (${Math.round(Math.max(a,c)*100)} cm)`])}
   if(ru.front){const t=freeDepth(o,f,ru.front,s,R.B);cl.push([f,ru.front,t]);if(t<ru.front-1e-6)out.push(['warn',`Devant : ${Math.round(t*100)} cm (${Math.round(ru.front*100)} conseillés)`])}
   return{out,cl}}
 /* ---------- portes ---------- */
+const fixedDoors=lv=>(ST[lv].sw||[]).map(([i,h,s])=>{const g=ST[lv].gaps[i],H=g[2]-g[0]>g[3]-g[1];return{d:{id:'fx'+i,c:H?(g[0]+g[2])/2:(g[1]+g[3])/2,w:H?g[2]-g[0]:g[3]-g[1],h,s,ty:'b'},w:{r:g}}});
 function doorSq(d,w){const r=w.r,a=d.c-d.w/2,b=d.c+d.w/2;return hor(r)?(d.s?[a,r[3],b,r[3]+d.w]:[a,r[1]-d.w,b,r[1]]):(d.s?[r[2],a,r[2]+d.w,b]:[r[0]-d.w,a,r[0],b])}
 function pocket(d){const a=d.c-d.w/2,b=d.c+d.w/2;return d.h?[b,b+d.w]:[a-d.w,a]}
 function doorIssues(d,s){const w=s.walls.find(x=>x.id==d.wall);if(!w)return[];const out=[],[lo,hi]=span(w),ty=d.ty||'b';
@@ -258,6 +260,7 @@ function planSvg(s,lv,opt){const st=ST[lv];let h=`<defs><pattern id="hz" width="
   for(const r of st.fixed)h+=`<rect ${ra(r)} fill="#5d6478"/>`;
   for(const w of st.win)h+=`<rect ${ra(w)} fill="#fff"/><rect ${ra(w)} fill="none" stroke="#1240e0" stroke-width="1.5"/>`;
   for(const g of st.gaps)h+=`<rect ${ra(g)} fill="#fff"/>`;
+  for(const f of fixedDoors(lv))h+=doorSvg(f.d,f.w,s).replace(/data-k="door" data-id="[^"]*"/,'pointer-events="none"');
   for(const w of s.walls){const on=opt.sel&&sel&&sel.k=='wall'&&sel.id==w.id,a=`data-k="wall" data-id="${w.id}" fill="#e0462a" stroke="${on?'#1240e0':'none'}" stroke-width="3" style="cursor:move"`;
     h+=w.seg?`<polygon ${a} points="${segPoly(w.seg,w.ep).map(p=>X(p[0])+','+Y(p[1])).join(' ')}"/>`:`<rect ${a} ${ra(w.r)}/>`}
   for(const d of s.doors){const w=s.walls.find(x=>x.id==d.wall);if(w&&!w.seg)h+=doorSvg(d,w,s)}
@@ -400,6 +403,7 @@ $('bgf').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image(
   BGU[lvl]=c.toDataURL('image/jpeg',.75);try{localStorage.setItem(K+'-bg-'+lvl,BGU[lvl])}catch(er){msg('Plan chargé, mais trop lourd pour être gardé après fermeture.')}CAL[lvl]={dx:0,dy:0,sx:100,sy:100,op:.35};$('bg').checked=true;render();URL.revokeObjectURL(im.src)};im.src=URL.createObjectURL(f)};
 $('copy').onclick=async()=>{try{await navigator.clipboard.writeText(JSON.stringify(S));msg('Scénarios copiés dans le presse-papiers.')}catch(e){$('imp').value=JSON.stringify(S);$('imp').closest('details').open=true;msg('Copie bloquée : le JSON est dans la zone Importer.')}};
 $('impb').onclick=()=>{try{const o=JSON.parse($('imp').value);if(!o.rdc||!o.etage)throw 0;push();S=o;migrate();cur={rdc:0,etage:0};sel=null;render();msg('Scénarios importés.')}catch(e){msg('JSON non reconnu.')}};
+$('impf').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{$('imp').value=t;$('impb').click()});e.target.value=''};
 $('reset').onclick=e=>twoStep(e.currentTarget,"Scénarios d'origine",()=>{push();S=DEF();cur={rdc:0,etage:0};sel=null;render()});
 $('bg').onchange=()=>render(false);
 /* ---------- exports ---------- */
