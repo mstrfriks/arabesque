@@ -130,6 +130,7 @@ def page(mode):
             for a, b in STR.treads()[2:]: line(*a, *b, 'fin')
             A(f'<polyline points="{P(STR.ARROW[1:])}" class="fin"/><path d="M{X(1.85)-1.4:.2f} {Y(3.55)-.8:.2f}L{X(1.85):.2f} {Y(3.55):.2f}L{X(1.85)-1.4:.2f} {Y(3.55)+.8:.2f}" class="fin"/>')
             A(f'<text x="{X(.75):.2f}" y="{Y(2.6):.2f}" class="t2 lab" text-anchor="middle">Trémie</text>')
+            A(f'<rect x="{X(2.1):.2f}" y="{Y(3.85):.2f}" width="{.55*SC:.2f}" height="{.55*SC:.2f}" class="cache"/><text x="{X(2.375):.2f}" y="{Y(3.85)-1:.2f}" class="t2 lab" text-anchor="middle">Trappe combles</text>')
         na = 0; dress = []
         for o in sc.get('beds', []):
             a_ = o['l'] if o['rot'] % 2 else o['w']; c_ = o['w'] if o['rot'] % 2 else o['l']
@@ -267,6 +268,7 @@ def page(mode):
         A(f'<line x1="{lx}" y1="{y+1.7}" x2="{lx+9}" y2="{y+1.7}" class="demol"/><text x="{lx+12}" y="{y+3}" class="t2">Bloc-porte existant déposé (baie conservée)</text>')
         A(f'<text x="{lx}" y="{y+11}" class="t2">Surfaces indicatives, calculées entre cloisons.</text>')
         A(f'<text x="{lx}" y="{y+15}" class="t2">Cotes non relevées sur site : à vérifier avant exécution.</text>')
+        A(f'<text x="{lx}" y="{y+19}" class="t2">Façade jardin : baies en pavés de verre avec ouvrant (RDC grands pans, étage impostes hautes).</text>')
         nx, ny = 150, 192
         A(f'<text x="{nx}" y="{ny}" class="t3 b">Nomenclature des travaux</text>')
         cols = [(0, 'Rep.'), (14, 'Niveau'), (32, 'Désignation'), (200, 'Qté'), (222, 'U')]
