@@ -2,6 +2,7 @@
 Usage : python3 plan_a3.py scenarios.json areas.json out_dir
 """
 import json, sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 S = json.load(open(sys.argv[1]))
 AREAS = json.load(open(sys.argv[2]))
@@ -115,14 +116,20 @@ def page(mode):
         def bubble(x, y, txt, col='#000'):
             A(f'<circle cx="{X(x):.2f}" cy="{Y(y):.2f}" r="3.3" fill="#fff" stroke="{col}" stroke-width=".28"/><text x="{X(x):.2f}" y="{Y(y)+.8:.2f}" class="t2 b" style="font-size:2.3px" text-anchor="middle">{txt}</text>')
         pre = 'R' if lv == 'rdc' else 'E'
-        import math
-        cx, cy, rr = 1.145, 3.115, .8
-        A(f'<circle cx="{X(cx):.2f}" cy="{Y(cy):.2f}" r="{rr*SC:.2f}" class="{"trait" if lv == "rdc" else "cache"}"/><circle cx="{X(cx):.2f}" cy="{Y(cy):.2f}" r="{.08*SC:.2f}" class="fin"/>')
-        for i in (range(14) if lv == 'rdc' else range(10, 14)):
-            a = math.radians(-90 + i*360/14)
-            A(f'<line x1="{X(cx)+.08*SC*math.cos(a):.2f}" y1="{Y(cy)-.08*SC*math.sin(a):.2f}" x2="{X(cx)+rr*SC*math.cos(a):.2f}" y2="{Y(cy)-rr*SC*math.sin(a):.2f}" class="fin"/>')
-        if lv != 'rdc':
-            A(f'<text x="{X(cx)+2:.2f}" y="{Y(cy)+5:.2f}" class="t2" text-anchor="middle" fill="#fff" stroke="#fff" stroke-width="1.2">Trémie</text><text x="{X(cx)+2:.2f}" y="{Y(cy)+5:.2f}" class="t2" text-anchor="middle">Trémie</text>')
+        import stair as STR
+        P = lambda pts: ' '.join(f'{X(a):.2f},{Y(b):.2f}' for a, b in pts)
+        if lv == 'rdc':
+            A(f'<polygon points="{P(STR.FOOT)}" fill="#ececec" stroke="#000" stroke-width=".35"/>')
+            for a, b in STR.treads(): line(*a, *b, 'fin')
+            A(f'<polyline points="{P(STR.CUT)}" fill="none" stroke="#000" stroke-width=".25"/>')
+            A(f'<polyline points="{P(STR.ARROW)}" class="fin"/><path d="M{X(1.85)-1.4:.2f} {Y(3.55)-.8:.2f}L{X(1.85):.2f} {Y(3.55):.2f}L{X(1.85)-1.4:.2f} {Y(3.55)+.8:.2f}" class="fin"/>')
+            A(f'<text x="{X(.75):.2f}" y="{Y(2.4)+3:.2f}" class="t2 b" text-anchor="middle">M</text>')
+        else:
+            s0 = st['stair']; line(s0[0], s0[1], s0[2], s0[3], 'fin'); line(s0[0], s0[3], s0[2], s0[1], 'fin')
+            A(f'<polygon points="{P(STR.FOOT[2:]+[(.3, 3.1)])}" fill="#ececec" stroke="#000" stroke-width=".3"/>')
+            for a, b in STR.treads()[2:]: line(*a, *b, 'fin')
+            A(f'<polyline points="{P(STR.ARROW[1:])}" class="fin"/><path d="M{X(1.85)-1.4:.2f} {Y(3.55)-.8:.2f}L{X(1.85):.2f} {Y(3.55):.2f}L{X(1.85)-1.4:.2f} {Y(3.55)+.8:.2f}" class="fin"/>')
+            A(f'<text x="{X(.75):.2f}" y="{Y(2.6):.2f}" class="t2 lab" text-anchor="middle">Trémie</text>')
         na = 0; dress = []
         for o in sc.get('beds', []):
             a_ = o['l'] if o['rot'] % 2 else o['w']; c_ = o['w'] if o['rot'] % 2 else o['l']

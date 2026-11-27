@@ -1,7 +1,8 @@
 """Planche « plan habité » A3, RDC + étage, scénario Alex – trait fin, poché noir, annotations manuscrites.
 Usage : python3 bowwow.py scenarios.json areas.json out.svg
 """
-import json, sys, math
+import json, sys, math, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 S = json.load(open(sys.argv[1])); AR = json.load(open(sys.argv[2])); OUT = sys.argv[3]
 D, W, K = 5.9, 8.2, 20.0  # K : mm par m (1/50)
@@ -29,6 +30,7 @@ A(f'''<svg xmlns="http://www.w3.org/2000/svg" width="420mm" height="297mm" viewB
 <defs>
 <pattern id="parquet" width="2.6" height="12" patternUnits="userSpaceOnUse"><path d="M0 0V12M0 5H2.6" stroke="#c9c3b8" stroke-width=".09"/></pattern>
 <pattern id="parquet2" width="12" height="2.6" patternUnits="userSpaceOnUse"><path d="M0 0H12M5 0V2.6" stroke="#c9c3b8" stroke-width=".09"/></pattern>
+<pattern id="beton" width="3" height="3" patternUnits="userSpaceOnUse"><rect width="3" height="3" fill="#f1efea"/><circle cx=".7" cy=".8" r=".12" fill="#9a958c"/><circle cx="2.1" cy="2" r=".09" fill="#9a958c"/><circle cx="2.4" cy=".5" r=".07" fill="#9a958c"/></pattern>
 <pattern id="tiles" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M0 0H4M0 0V4" stroke="#cfcfcf" stroke-width=".09"/></pattern>
 <pattern id="stone" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M0 0H6M0 3H6M0 0V3M3 3V6" stroke="#d4cec4" stroke-width=".09"/></pattern>
 </defs>
@@ -152,19 +154,18 @@ def level(lv, ox, oy):
     else:
         A(r_(X(4.6), Y(5.35), 2.0*K, 1.25*K, 'lf', .4)); A(f'<path d="M{X(4.6)+3:.2f} {Y(5.35)+3:.2f}h{2.0*K-6:.2f}v{1.25*K-6:.2f}h{-(2.0*K-6):.2f}z" class="d"/>')
     # escalier / trémie
-    cx, cy, rr = 1.145, 3.115, .8
+    import stair as STR
+    P = lambda pts: ' '.join(f'{X(a):.2f},{Y(b):.2f}' for a, b in pts)
     if lv == 'rdc':
-        A(f'<circle cx="{X(cx):.2f}" cy="{Y(cy):.2f}" r="{rr*K:.2f}" class="lf"/><circle cx="{X(cx):.2f}" cy="{Y(cy):.2f}" r="{.08*K:.2f}" class="lf"/>')
-        for i in range(14):
-            a = math.radians(-90 + i*360/14)
-            A(f'<path d="M{X(cx)+.08*K*math.cos(a):.2f} {Y(cy)-.08*K*math.sin(a):.2f}L{X(cx)+rr*K*math.cos(a):.2f} {Y(cy)-rr*K*math.sin(a):.2f}" class="l"/>')
-        A(f'<path d="M{X(cx)+.52*K:.2f} {Y(cy):.2f}A{.52*K:.2f} {.52*K:.2f} 0 1 0 {X(cx):.2f} {Y(cy)+.52*K:.2f}" class="t"/><path d="M{X(cx)-1.2:.2f} {Y(cy)+.52*K-1.1:.2f}L{X(cx):.2f} {Y(cy)+.52*K:.2f}L{X(cx)-1.2:.2f} {Y(cy)+.52*K+1.1:.2f}" class="t"/>')
+        A(f'<polygon points="{P(STR.FOOT)}" fill="url(#beton)" stroke="#111" stroke-width=".3"/>')
+        for a, b in STR.treads(): A(f'<path d="M{X(a[0]):.2f} {Y(a[1]):.2f}L{X(b[0]):.2f} {Y(b[1]):.2f}" class="l"/>')
+        A(f'<polyline points="{P(STR.CUT)}" class="l"/><polyline points="{P(STR.ARROW)}" class="t"/>')
+        A(f'<path d="M{X(1.85)-1.4:.2f} {Y(3.55)-.8:.2f}L{X(1.85):.2f} {Y(3.55):.2f}L{X(1.85)-1.4:.2f} {Y(3.55)+.8:.2f}" class="t"/>')
     else:
-        A(f'<circle cx="{X(cx):.2f}" cy="{Y(cy):.2f}" r="{rr*K:.2f}" class="t"/><circle cx="{X(cx):.2f}" cy="{Y(cy):.2f}" r="{.08*K:.2f}" class="lf"/>')
-        for i in range(10, 14):
-            a = math.radians(-90 + i*360/14)
-            A(f'<path d="M{X(cx)+.08*K*math.cos(a):.2f} {Y(cy)-.08*K*math.sin(a):.2f}L{X(cx)+rr*K*math.cos(a):.2f} {Y(cy)-rr*K*math.sin(a):.2f}" class="l"/>')
-        A(f'<path d="M{X(cx)-rr*K*.7:.2f} {Y(cy)-rr*K*.7:.2f}L{X(cx)+rr*K*.7:.2f} {Y(cy)+rr*K*.7:.2f}" class="g"/>')
+        A(f'<polygon points="{P(STR.FOOT[2:]+[(.3, 3.1)])}" fill="url(#beton)" stroke="#111" stroke-width=".3"/>')
+        for a, b in STR.treads()[2:]: A(f'<path d="M{X(a[0]):.2f} {Y(a[1]):.2f}L{X(b[0]):.2f} {Y(b[1]):.2f}" class="l"/>')
+        A(f'<path d="M{X(.24):.2f} {Y(2.17):.2f}L{X(1.99):.2f} {Y(3.1):.2f}M{X(.24):.2f} {Y(3.1):.2f}L{X(1.99):.2f} {Y(2.17):.2f}" class="g"/>')
+        A(f'<polyline points="{P(STR.ARROW[1:])}" class="t"/><path d="M{X(1.85)-1.4:.2f} {Y(3.55)-.8:.2f}L{X(1.85):.2f} {Y(3.55):.2f}L{X(1.85)-1.4:.2f} {Y(3.55)+.8:.2f}" class="t"/>')
     # sanitaires
     def tub(x0, y0, x1, y1):
         A(r_(X(x0), Y(y1), (x1-x0)*K, (y1-y0)*K, 'lf', 1.5)); A(r_(X(x0)+1.4, Y(y1)+1.4, (x1-x0)*K-2.8, (y1-y0)*K-2.8, 't', 4))
